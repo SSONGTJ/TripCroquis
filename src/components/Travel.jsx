@@ -48,6 +48,8 @@ const StyledButton = styled.button`
     }
 `;
 
+const API_KEY = import.meta.env.VITE_APP_API_KEY;
+
 const Travel = () => {
     const mapRef = useRef(null);
     const inputRef = useRef(null);
@@ -63,7 +65,7 @@ const Travel = () => {
 
             const script = document.createElement('script');
             script.id = 'google-maps-script';
-            script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyAX8LV4r7I1oeADd__z1C61M3UasEAA8Bs&libraries=places`;
+            script.src = `https://maps.googleapis.com/maps/api/js?key=${API_KEY}&libraries=places`;
             script.async = true;
             script.onload = () => initMap();
             document.body.appendChild(script);
