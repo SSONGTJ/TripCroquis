@@ -2,7 +2,6 @@ import './App.css';
 import styled from 'styled-components';
 import Travel from './components/Travel';
 import BottomNav from './components/BottomNav';
-import ShareCapture from './components/ShareCapture';
 
 const Wrapper = styled.div`
     display: flex;
