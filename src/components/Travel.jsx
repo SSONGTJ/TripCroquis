@@ -1,3 +1,4 @@
+import html2canvas from 'html2canvas';
 import React, { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 
@@ -11,7 +12,7 @@ const PlaceList = styled.ul`
     display: flex;
     flex-direction: column;
     max-height: 150px;
-    height:150px;
+    height: 150px;
     overflow-y: auto;
 `;
 
@@ -79,8 +80,8 @@ const ModalContent = styled.div`
     max-width: 400px;
     text-align: center;
     color: black;
-    display:flex;
-    flex-direction:column;
+    display: flex;
+    flex-direction: column;
 `;
 
 const Button = styled.button`
@@ -244,6 +245,37 @@ const Travel = () => {
             .catch((err) => console.error('복사 실패:', err));
     };
 
+    const handleCapture = async () => {
+        try {
+            // 2️⃣ 모달 닫기
+            setIsModalOpen(false);
+
+            // 3️⃣ 지도 전체 화면 모드 전환
+            const fullscreenButton = document.querySelector(
+                '.gm-fullscreen-control'
+            );
+            if (fullscreenButton) {
+                fullscreenButton.click();
+            }
+
+            // 4️⃣ 1초 대기 후 캡처 실행
+            setTimeout(async () => {
+                const canvas = await html2canvas(document.body);
+                const link = document.createElement('a');
+                link.href = canvas.toDataURL('image/png');
+                link.download = 'full_page_capture.png';
+                link.click();
+                setTimeout(() => {
+                    if (fullscreenButton) {
+                        fullscreenButton.click();
+                    }
+                }, 500);
+            }, 1000);
+        } catch (err) {
+            console.error('오류 발생:', err);
+        }
+    };
+
     return (
         <FlexDiv>
             <div
@@ -292,7 +324,10 @@ const Travel = () => {
                             {listText}
                         </pre>
                         <Button onClick={handleCopyToClipboard}>
-                            복사하기
+                            경로 복사하기
+                        </Button>
+                        <Button onClick={handleCapture}>
+                            경로 캡처하기
                         </Button>
                         <Button onClick={() => setIsModalOpen(false)}>
                             닫기
