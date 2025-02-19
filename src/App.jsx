@@ -1,7 +1,6 @@
 import './App.css';
 import styled from 'styled-components';
 import Travel from './components/Travel';
-import BottomNav from './components/BottomNav';
 
 const Wrapper = styled.div`
     display: flex;
@@ -42,8 +41,6 @@ function App() {
                     <AppContent>
                         <Travel />
                     </AppContent>
-                    <BottomNav style={{ marginTop: 'auto' }} />
-                    {/* <ShareCapture/> */}
                 </PhoneBox>
             </Wrapper>
         </>
