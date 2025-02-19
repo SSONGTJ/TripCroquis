@@ -19,7 +19,17 @@ Trip Croquis는 여행 경로를 쉽게 기록하고, 공유할 수 있도록 �
 
 ## 📂 프로젝트 구조
 
-TripCroquis/ │── public/ │── src/ │ ├── components/ │ │ ├── Travel.js │ │ ├── BottomNav.js │ │ ├── ShareCapture.js │ ├── App.js │ ├── index.js │── package.json │── README.md
+TripCroquis/
+│── public/ 
+│── src/ 
+│ ├── components/ 
+│ │ ├── Travel.js 
+│ │ ├── BottomNav.js 
+│ │ ├── ShareCapture.js 
+│ ├── App.js 
+│ ├── index.js 
+│── package.json 
+│── README.md
 
 
 ## 📖 사용 방법
