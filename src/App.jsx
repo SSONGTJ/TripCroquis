@@ -2,6 +2,7 @@ import './App.css';
 import styled from 'styled-components';
 import Travel from './components/Travel';
 import BottomNav from './components/BottomNav';
+import ShareCapture from './components/ShareCapture';
 
 const Wrapper = styled.div`
     display: flex;
@@ -17,12 +18,15 @@ const PhoneBox = styled.div`
     border-radius: 30px; /* 둥근 모서리 */
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* 그림자 효과 */
     overflow: hidden; /* 내용이 넘칠 경우 숨김 처리 */
+    display: flex;
+    flex-direction: column;
 `;
 const AppContent = styled.div`
+    flex: 1;
     padding: 0 20px 0;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
 `;
 const Title = styled.h1`
@@ -39,7 +43,8 @@ function App() {
                     <AppContent>
                         <Travel />
                     </AppContent>
-                    <BottomNav style={{ position:'absolute' }} />
+                    <BottomNav style={{ marginTop: 'auto' }} />
+                    {/* <ShareCapture/> */}
                 </PhoneBox>
             </Wrapper>
         </>

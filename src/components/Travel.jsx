@@ -6,20 +6,27 @@ const PlaceList = styled.ul`
     padding: 0;
     display: flex;
     flex-direction: column;
-    max-height: 200px;
-    overflow-y: scroll;
+    max-height: 150px;
+    overflow-y: auto;
 `;
+
 const ListUp = styled.li`
     list-style: none;
     padding: 10px 10px;
     margin: 5px 10px;
     display: flex;
     align-items: center;
+    justify-content: space-between;
     border: 1px solid #efefef;
     border-radius: 10px;
 `;
 
-const InputButton = styled.div`
+const DistanceText = styled.span`
+    font-size: 14px;
+    color: gray;
+`;
+
+const InputButtonWrap = styled.div`
     display: flex;
     align-items: center;
     gap: 10px;
@@ -58,6 +65,7 @@ const Travel = () => {
     const [placesList, setPlacesList] = useState([]);
     const [markers, setMarkers] = useState([]);
     const [polyline, setPolyline] = useState(null);
+    const [distances, setDistances] = useState([]);
 
     useEffect(() => {
         const loadScript = () => {
@@ -65,7 +73,7 @@ const Travel = () => {
 
             const script = document.createElement('script');
             script.id = 'google-maps-script';
-            script.src = `https://maps.googleapis.com/maps/api/js?key=${API_KEY}&libraries=places`;
+            script.src = `https://maps.googleapis.com/maps/api/js?key=${API_KEY}&libraries=places,geometry`;
             script.async = true;
             script.onload = () => initMap();
             document.body.appendChild(script);
@@ -87,9 +95,7 @@ const Travel = () => {
     useEffect(() => {
         if (!map || !window.google || !inputRef.current) return;
 
-        const autocomplete = new window.google.maps.places.Autocomplete(
-            inputRef.current
-        );
+        const autocomplete = new window.google.maps.places.Autocomplete(inputRef.current);
         autocomplete.addListener('place_changed', () => {
             const place = autocomplete.getPlace();
             if (!place.geometry || !place.geometry.location) return;
@@ -106,76 +112,80 @@ const Travel = () => {
         });
     }, [map]);
 
-    // 장소 추가 및 지도 업데이트
+    // 🛠 장소 추가 및 마커 표시
     const handleAddPlace = () => {
-        if (selectedPlace) {
-            setPlacesList((prevList) => {
-                const updatedList = [...prevList, selectedPlace];
-
-                // 새로운 마커 추가
-                const newMarker = new window.google.maps.Marker({
-                    position: selectedPlace,
-                    map,
-                    title: selectedPlace.name,
-                });
-
-                setMarkers((prevMarkers) => [...prevMarkers, newMarker]);
-
-                // 2개 이상이면 경로(Polyline) 업데이트
-                if (updatedList.length > 1) {
-                    if (polyline) polyline.setMap(null); // 기존 선 삭제
-
-                    const newPolyline = new window.google.maps.Polyline({
-                        path: updatedList.map((place) => ({
-                            lat: place.lat,
-                            lng: place.lng,
-                        })),
-                        geodesic: true,
-                        strokeColor: '#FF0000',
-                        strokeOpacity: 1.0,
-                        strokeWeight: 2,
-                        map,
-                    });
-
-                    setPolyline(newPolyline);
-                }
-
-                return updatedList;
+        if (selectedPlace && map) {
+            const newMarker = new window.google.maps.Marker({
+                position: { lat: selectedPlace.lat, lng: selectedPlace.lng },
+                map,
+                title: selectedPlace.name,
             });
 
+            setMarkers((prevMarkers) => [...prevMarkers, newMarker]);
+            setPlacesList((prevList) => [...prevList, selectedPlace]);
             setSelectedPlace(null);
-            inputRef.current.value = ''; // 입력창 초기화
+            inputRef.current.value = '';
         }
     };
 
+     // 🔗 거리 계산 및 폴리라인 업데이트
+     useEffect(() => {
+        if (placesList.length > 1) {
+            const updatedDistances = [];
+            const path = [];
+
+            for (let i = 0; i < placesList.length - 1; i++) {
+                const placeA = placesList[i];
+                const placeB = placesList[i + 1];
+
+                const distance = window.google.maps.geometry.spherical.computeDistanceBetween(
+                    new window.google.maps.LatLng(placeA.lat, placeA.lng),
+                    new window.google.maps.LatLng(placeB.lat, placeB.lng)
+                );
+
+                updatedDistances.push(distance);
+            }
+
+            placesList.forEach((place) => {
+                path.push(new window.google.maps.LatLng(place.lat, place.lng));
+            });
+
+            if (polyline) {
+                polyline.setMap(null); // 기존 경로 제거
+            }
+
+            const newPolyline = new window.google.maps.Polyline({
+                path,
+                geodesic: true,
+                strokeColor: '#FF0000',
+                strokeOpacity: 1.0,
+                strokeWeight: 2,
+                map,
+            });
+
+            setPolyline(newPolyline);
+            setDistances(updatedDistances);
+        }
+    }, [placesList, map]);
+
     return (
         <div>
-            {/* 지도 표시 영역 */}
-            <div
-                ref={mapRef}
-                style={{ height: '30vh', width: '100%', marginTop: '10px' }}
-            ></div>
+            <div ref={mapRef} style={{ height: '30vh', width: '100%', marginTop: '10px' }}></div>
 
-            <InputButton>
-                {/* 검색 입력창 */}
-                <StyledInput
-                    ref={inputRef}
-                    type="text"
-                    placeholder="장소 검색"
-                />
-                <StyledButton
-                    onClick={handleAddPlace}
-                    style={{ marginLeft: '10px', padding: '10px' }}
-                >
+            <InputButtonWrap>
+                <StyledInput ref={inputRef} type="text" placeholder="장소 검색"/>
+                <StyledButton onClick={handleAddPlace}>
                     추가
                 </StyledButton>
-            </InputButton>
+            </InputButtonWrap>
 
-            {/* 추가된 장소 리스트 */}
             <PlaceList>
                 {placesList.map((place, index) => (
                     <ListUp key={index}>
-                        {index + 1}. {place.name}
+                        <span>{index + 1}. {place.name}</span>
+                        {index > 0 && distances[index - 1] !== undefined && (
+                            <DistanceText>({distances[index - 1]?.toFixed(2)} m)</DistanceText>
+                        )}
                     </ListUp>
                 ))}
             </PlaceList>
